@@ -61,7 +61,7 @@ class ConstControl(Controller):
     def __init__(self, net, element, variable, element_index, profile_name=None, data_source=None,
                  scale_factor=1.0, in_service=True, recycle=True, order=-1, level=-1,
                  drop_same_existing_ctrl=False, matching_params=None,
-                 initial_run=False, **kwargs):
+                 initial_run=False, pass_element=None, pass_variable=None, pass_element_index=None,**kwargs):
         # just calling init of the parent
         if matching_params is None:
             matching_params = {"element": element, "variable": variable,
@@ -78,6 +78,11 @@ class ConstControl(Controller):
         # element type
         self.element = element
         self.values = None
+        # Thedas change
+        self.pass_element = pass_element
+        self.pass_variable = pass_variable
+        self.pass_element_index = pass_element_index
+        
         self.profile_name = profile_name
         self.scale_factor = scale_factor
         self.applied = False
@@ -115,6 +120,8 @@ class ConstControl(Controller):
         self.applied = False
         if self.data_source is None:
             self.values = net[self.element][self.variable].loc[self.element_index]
+        elif self.data_source == 'Pass':
+            self.values = net[self.pass_element][self.pass_variable].loc[self.pass_element_index]
         else:
             self.values = self.data_source.get_time_step_value(time_step=time,
                                                                profile_name=self.profile_name,
