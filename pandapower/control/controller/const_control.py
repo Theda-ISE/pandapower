@@ -78,6 +78,7 @@ class ConstControl(Controller):
         # element type
         self.element = element
         self.values = None
+
         # Thedas change
         self.pass_element = pass_element
         self.pass_variable = pass_variable
