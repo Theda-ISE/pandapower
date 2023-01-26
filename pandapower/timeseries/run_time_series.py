@@ -126,7 +126,7 @@ def run_time_step(net, time_step, ts_variables, run_control_fct=run_control, out
 
     try:
         # calls controller init, control steps and run function (runpp usually is called in here)
-        run_control_fct(net, ctrl_variables=ts_variables, **kwargs)
+        run_control_fct(net, ctrl_variables=ts_variables, time_step=time_step, **kwargs)
     except ControllerNotConverged:
         ctrl_converged = False
         # If controller did not converge do some stuff
