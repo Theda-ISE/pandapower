@@ -12,6 +12,8 @@ from pandapower.control.run_control import ControllerNotConverged, prepare_run_c
     run_control, NetCalculationNotConverged
 from pandapower.control.util.diagnostic import control_diagnostic
 from pandapower.timeseries.output_writer import OutputWriter
+from pandapipes.control.controller.collecting_controller import CollectorController
+from pandapower.toolbox import _read_with_loc
 
 try:
     import pandaplan.core.pplog as pplog
@@ -84,6 +86,12 @@ def control_time_step(controller_order, time_step):
     for levelorder in controller_order:
         for ctrl, net in levelorder:
             ctrl.time_step(net, time_step)
+        CollectorController.consolidate_logic(net)
+
+def feedback_mv_time_step(controller_order, time_step):
+        for levelorder in controller_order:
+            for ctrl, net in levelorder:
+                ctrl.prev_mv = _read_with_loc(net, ctrl.fc_element, ctrl.fc_variable, ctrl.fc_element_index)
 
 
 def finalize_step(controller_order, time_step):
@@ -123,6 +131,7 @@ def run_time_step(net, time_step, ts_variables, run_control_fct=run_control, out
     # run time step function for each controller
 
     control_time_step(ts_variables['controller_order'], time_step)
+    feedback_mv_time_step(ts_variables['controller_order'], time_step)
 
     try:
         # calls controller init, control steps and run function (runpp usually is called in here)
