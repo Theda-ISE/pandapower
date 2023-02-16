@@ -86,12 +86,14 @@ def control_time_step(controller_order, time_step):
     for levelorder in controller_order:
         for ctrl, net in levelorder:
             ctrl.time_step(net, time_step)
-        CollectorController.consolidate_logic(net)
+            if ctrl.ctrl_typ == 'override':
+                CollectorController.consolidate_logic(net)
 
 def feedback_mv_time_step(controller_order, time_step):
         for levelorder in controller_order:
             for ctrl, net in levelorder:
-                ctrl.prev_mv = _read_with_loc(net, ctrl.fc_element, ctrl.fc_variable, ctrl.fc_element_index)
+                if ctrl.ctrl_typ == 'override':
+                    ctrl.prev_mv = _read_with_loc(net, ctrl.fc_element, ctrl.fc_variable, ctrl.fc_element_index)
 
 
 def finalize_step(controller_order, time_step):
