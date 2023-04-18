@@ -11,9 +11,10 @@ from pandapower import LoadflowNotConverged, OPFNotConverged
 from pandapower.control.run_control import ControllerNotConverged, prepare_run_ctrl, \
     run_control, NetCalculationNotConverged
 from pandapower.control.util.diagnostic import control_diagnostic
+from pandapipes.control.controller.pid_controller import PidControl
 from pandapower.timeseries.output_writer import OutputWriter
 from pandapipes.control.controller.collecting_controller import CollectorController
-from pandapower.toolbox import _read_with_loc
+from pandapower.toolbox import _read_with_loc, _read_from_single_index
 
 try:
     import pandaplan.core.pplog as pplog
@@ -86,14 +87,16 @@ def control_time_step(controller_order, time_step):
     for levelorder in controller_order:
         for ctrl, net in levelorder:
             ctrl.time_step(net, time_step)
-            if ctrl.ctrl_typ == 'override':
-                CollectorController.consolidate_logic(net)
+        if CollectorController.collect_ctrl_active:
+            CollectorController.consolidate_logic(net)
+
 
 def feedback_mv_time_step(controller_order, time_step):
         for levelorder in controller_order:
             for ctrl, net in levelorder:
-                if ctrl.ctrl_typ == 'override':
-                    ctrl.prev_mv = _read_with_loc(net, ctrl.fc_element, ctrl.fc_variable, ctrl.fc_element_index)
+                if isinstance(ctrl, PidControl):
+                    ctrl.prev_mv = _read_from_single_index(net, ctrl.fc_element, ctrl.fc_variable,
+                                                           ctrl.fc_element_index)
 
 
 def finalize_step(controller_order, time_step):
